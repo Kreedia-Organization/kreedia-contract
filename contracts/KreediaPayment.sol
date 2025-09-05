@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.28
+pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract KreediaPayment is Ownable {
+contract KreediaPayment {
     mapping(address => mapping(address => uint256)) public workerTotalEarned;
     struct LockedFunds {
         address token;
@@ -27,7 +27,8 @@ contract KreediaPayment is Ownable {
     error InvalideAddress();
     error CustomError(string message);
 
-    function addToken(address token) external onlyOwner {
+
+    function addToken(address token) external {
         if (token == address(0)) revert CustomError("Invalide token address");
         if (acceptedTokens[token]) revert CustomError("Token already added");
 
@@ -35,7 +36,7 @@ contract KreediaPayment is Ownable {
         emit TokenAdded(token);
     }
 
-    function removeToken(address token) external onlyOwner {
+    function removeToken(address token) external {
         if (token == address(0)) revert InvalideAddress();
         if (!acceptedTokens[token]) revert CustomError("This token was never allowed");
 
@@ -43,7 +44,7 @@ contract KreediaPayment is Ownable {
         emit TokenRemoved(token);
     }
 
-    function lockFunds(string missionId, address token, uint256 amount) external {
+    function lockFunds(string memory missionId, address token, uint256 amount) external {
         if (!acceptedTokens[token]) revert CustomError("The token you're trying to use is not accepted");
         if (amount <= 0) revert CustomError("Amount must be greater than zero");
 
@@ -55,9 +56,9 @@ contract KreediaPayment is Ownable {
         emit MoneyLocked(missionId, token, amount, msg.sender);
     }
 
-    function unlockFunds(string missionId) external {
+    function unlockFunds(string memory missionId) external {
         LockedFunds storage lf = missionFunds[missionId];
-        if (!lf.locked) revert CustomError("This mission don't have locked funds")
+        if (!lf.locked) revert CustomError("This mission don't have locked funds");
         
 
         bool success = IERC20(lf.token).transfer(lf.ngo, lf.amount);
@@ -69,11 +70,11 @@ contract KreediaPayment is Ownable {
     }
 
     function validateMission(
-        string missionId,
+        string memory missionId,
         address reporter,
         address worker,
         address platform
-    ) external onlyOwner {
+    ) external {
         LockedFunds storage lf = missionFunds[missionId];
 
         if (reporter == address(0)) revert CustomError("Invalide reporter address");
@@ -98,7 +99,7 @@ contract KreediaPayment is Ownable {
 
     }
 
-    function withdrawPlatformFees(address token, uint256 amount, address to) external onlyOwner {
+    function withdrawPlatformFees(address token, uint256 amount, address to) external {
         if (to == address(0)) revert CustomError("Invalide address");
         if (amount <= 0) revert CustomError("Amount must be greater than zero");
 
