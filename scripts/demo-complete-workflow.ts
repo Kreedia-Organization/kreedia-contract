@@ -23,13 +23,13 @@ async function main() {
     const mockToken = await ethers.getContractAt("contracts/mocks/ERC20Mock.sol:ERC20Mock", mockTokenAddress);
     console.log("✅ Mock USDC deployed:", mockTokenAddress);
 
-    // Deploy Unified Contract
-    const KreediaUnified = await ethers.getContractFactory("KreediaUnifiedSimple");
-    const kreediaDeployment = await KreediaUnified.deploy(deployer.address);
+    // Deploy Kreedia Contract
+    const KreediaContractFactory = await ethers.getContractFactory("KreediaContract");
+    const kreediaDeployment = await KreediaContractFactory.deploy(deployer.address);
     await kreediaDeployment.waitForDeployment();
     const kreediaAddress = await kreediaDeployment.getAddress();
-    const kreedia = await ethers.getContractAt("KreediaUnifiedSimple", kreediaAddress);
-    console.log("✅ KreediaUnified deployed:", kreediaAddress);
+    const kreedia = await ethers.getContractAt("KreediaContract", kreediaAddress);
+    console.log("✅ KreediaContract deployed:", kreediaAddress);
 
     // Configure contract
     await kreedia.addToken(mockTokenAddress);
@@ -57,7 +57,6 @@ async function main() {
       missionId,
       mockTokenAddress,
       fundingAmount,
-      ngo.address,
       worker.address
     );
     const createReceipt = await createTx.wait();
@@ -74,10 +73,9 @@ async function main() {
         if (parsed?.name === "MissionCreated") {
           console.log("🎉 MissionCreated:", {
             missionId: parsed.args[0],
-            creator: parsed.args[1].slice(0, 8) + "...",
-            worker: parsed.args[2].slice(0, 8) + "...",
-            ngo: parsed.args[3].slice(0, 8) + "...",
-            amount: ethers.formatUnits(parsed.args[4], 18) + " TUSDC"
+            worker: parsed.args[1].slice(0, 8) + "...",
+            ngo: parsed.args[2].slice(0, 8) + "...",
+            amount: ethers.formatUnits(parsed.args[3], 18) + " TUSDC"
           });
         }
         if (parsed?.name === "NFTMinted") {
